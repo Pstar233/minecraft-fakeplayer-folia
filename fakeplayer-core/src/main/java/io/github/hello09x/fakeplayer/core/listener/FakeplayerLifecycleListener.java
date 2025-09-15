@@ -5,13 +5,22 @@ import com.google.inject.Singleton;
 import io.github.hello09x.fakeplayer.core.Main;
 import io.github.hello09x.fakeplayer.core.config.FakeplayerConfig;
 import io.github.hello09x.fakeplayer.core.manager.FakeplayerManager;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.TicketType;
+import net.minecraft.world.entity.Pose;
+import net.minecraft.world.level.ChunkPos;
 import org.bukkit.Bukkit;
+import org.bukkit.craftbukkit.entity.CraftPlayer;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.jetbrains.annotations.NotNull;
+
+import java.awt.*;
 
 /**
  * @author tanyaofei
@@ -48,7 +57,7 @@ public class FakeplayerLifecycleListener implements Listener {
             return;
         }
 
-        Bukkit.getScheduler().runTaskLater(Main.getInstance(), () -> {
+        Bukkit.getRegionScheduler().runDelayed(Main.getInstance(), player.getLocation(), task -> {
             if (player.isOnline()) {
                 manager.dispatchCommands(player, config.getAfterSpawnCommands());
                 manager.issueCommands(player, config.getSelfCommands());
@@ -75,11 +84,30 @@ public class FakeplayerLifecycleListener implements Listener {
             // Not a fake player
             return;
         }
-
-        Bukkit.getScheduler().runTaskLater(Main.getInstance(), () -> {
+        Bukkit.getGlobalRegionScheduler().runDelayed(Main.getInstance(), task -> {
             manager.dispatchCommands(player, config.getAfterQuitCommands());
         }, 20);
     }
 
+    private void clearTickets(Player player) {
+        ServerPlayer handle1 = ((CraftPlayer) player).getHandle();
+        ServerLevel level = handle1.level();
+        ChunkPos pos = handle1.chunkPosition();
+
+        int viewDistance = Bukkit.getViewDistance();
+        int simulationDistance = Bukkit.getSimulationDistance();
+
+        level.getChunkSource().removeTicketWithRadius(
+                TicketType.PLAYER_LOADING,
+                pos,
+                viewDistance
+        );
+        level.getChunkSource().removeTicketWithRadius(
+                TicketType.PLAYER_SIMULATION,
+                pos,
+                simulationDistance
+        );
+
+    }
 
 }

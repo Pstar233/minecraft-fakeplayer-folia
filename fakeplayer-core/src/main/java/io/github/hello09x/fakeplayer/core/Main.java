@@ -58,6 +58,7 @@ public final class Main extends JavaPlugin {
             messenger.registerOutgoingPluginChannel(this, "BungeeCord");
         }
 
+
         {
             var manager = getServer().getPluginManager();
             manager.registerEvents(injector.getInstance(PlayerListener.class), this);
@@ -67,6 +68,7 @@ public final class Main extends JavaPlugin {
             manager.registerEvents(injector.getInstance(FakeplayerReplenishManager.class), this);
             manager.registerEvents(injector.getInstance(InvseeManager.class), this);
         }
+
 
         {
             var placeholderExpansion = injector.getInstance(FakeplayerPlaceholderExpansion.class);

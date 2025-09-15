@@ -73,7 +73,8 @@ public class ConfigCommand extends AbstractCommand {
                     }).toList())
             )).toList();
             var message = join(separator(newline()), lines);
-            Bukkit.getScheduler().runTask(Main.getInstance(), () -> sender.sendMessage(message));
+
+            Bukkit.getGlobalRegionScheduler().run(Main.getInstance(), task -> sender.sendMessage(message));
         });
     }
 

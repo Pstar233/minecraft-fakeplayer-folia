@@ -1,7 +1,6 @@
 package io.github.hello09x.fakeplayer.core.entity;
 
 import io.github.hello09x.devtools.command.exception.CommandException;
-import io.github.hello09x.devtools.core.utils.EntityUtils;
 import io.github.hello09x.devtools.core.utils.SchedulerUtils;
 import io.github.hello09x.devtools.core.utils.WorldUtils;
 import io.github.hello09x.fakeplayer.api.spi.*;
@@ -16,23 +15,34 @@ import io.github.hello09x.fakeplayer.core.manager.action.ActionManager;
 import io.github.hello09x.fakeplayer.core.manager.naming.SequenceName;
 import io.github.hello09x.fakeplayer.core.util.Attributes;
 import io.github.hello09x.fakeplayer.core.util.InternalAddressGenerator;
+import io.papermc.paper.util.Tick;
 import lombok.Getter;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.TicketType;
+import net.minecraft.world.level.ChunkPos;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Sound;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.command.CommandSender;
+import org.bukkit.craftbukkit.entity.CraftPlayer;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnknownNullability;
 
+import java.awt.*;
 import java.net.InetAddress;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
@@ -115,66 +125,72 @@ public class Fakeplayer {
      * 让假人诞生
      */
     public CompletableFuture<Void> spawnAsync(@NotNull SpawnOption option) {
-        var address = ipGen.next();
-        this.player.setMetadata(MetadataKeys.SPAWNED_AT, new FixedMetadataValue(Main.getInstance(), Bukkit.getCurrentTick()));
-        return SchedulerUtils
-                .runTaskAsynchronously(Main.getInstance(), () -> {
-                    var event = this.callPreLoginEvent(address);
-                    if (event.getLoginResult() != AsyncPlayerPreLoginEvent.Result.ALLOWED) {
-                        throw new CommandException(translatable(
-                                "fakeplayer.command.spawn.error.disallowed",
-                                text(player.getName(), WHITE),
-                                event.kickMessage()
-                        ).color(RED));
-                    }
-                })
-                .thenComposeAsync(nul -> SchedulerUtils.runTask(Main.getInstance(), () -> {
-                    {
-                        var event = this.callLoginEvent(address);
-                        if (event.getResult() != PlayerLoginEvent.Result.ALLOWED && config.getPreventKicking().ordinal() < PreventKicking.ON_SPAWNING.ordinal()) {
-                            throw new CommandException(translatable(
-                                    "fakeplayer.command.spawn.error.disallowed", RED,
-                                    text(player.getName(), WHITE),
-                                    event.kickMessage()
-                            ));
-                        }
-                    }
+        CompletableFuture<Void> completableFuture = new CompletableFuture<>();
+        Bukkit.getRegionScheduler().run(Main.getInstance(), player.getLocation(), task -> {
+            var address = ipGen.next();
+            this.player.setMetadata(MetadataKeys.SPAWNED_AT, new FixedMetadataValue(Main.getInstance(), Bukkit.getCurrentTick()));
 
-                    if (config.isDropInventoryOnQuiting()) {
-                        // 跨服背包同步插件可能导致假人既丢弃了一份到地上，在重新生成的时候又回来了
-                        // 因此在生成的时候清空一次背包
-                        // 但无法解决登陆后延迟同步背包的情况
-                        this.player.getInventory().clear();
-                    }
+            Bukkit.getAsyncScheduler().runNow(Main.getInstance(), task1 -> {
+                var event = this.callPreLoginEvent(address);
+                if (event.getLoginResult() != AsyncPlayerPreLoginEvent.Result.ALLOWED) {
+                    throw new CommandException(translatable(
+                            "fakeplayer.command.spawn.error.disallowed",
+                            text(player.getName(), WHITE),
+                            event.kickMessage()
+                    ).color(RED));
+                }
+            });
 
-                    this.player.setInvulnerable(option.invulnerable());
-                    this.player.setCollidable(option.collidable());
-                    this.player.setCanPickupItems(option.pickupItems());
-                    if (option.lookAtEntity()) {
-                        actionManager.setAction(player, ActionType.LOOK_AT_NEAREST_ENTITY, ActionSetting.continuous());
-                    }
-                    if (option.skin()) {
-                        skinManager.useDefaultSkin(creator, player);
-                    }
-                    if (option.replenish()) {
-                        replenishManager.setReplenish(player, true);
-                    }
-                    if (option.autofish()) {
-                        autofishManager.setAutofish(player, true);
-                    }
+            {
+                var event = this.callLoginEvent(address);
+                if (event.getResult() != PlayerLoginEvent.Result.ALLOWED && config.getPreventKicking().ordinal() < PreventKicking.ON_SPAWNING.ordinal()) {
+                    throw new CommandException(translatable(
+                            "fakeplayer.command.spawn.error.disallowed", RED,
+                            text(player.getName(), WHITE),
+                            event.kickMessage()
+                    ));
+                }
+            }
 
-                    this.network = bridge.createNetwork(address);
-                    this.network.placeNewPlayer(Bukkit.getServer(), this.player);
-                    this.player.setHealth(Optional.ofNullable(this.player.getAttribute(Attributes.maxHealth()))
-                                                  .map(AttributeInstance::getValue)
-                                                  .orElse(20D));    // 恢复生命值
-                    this.player.setFoodLevel(20);
-                    this.setupName();
-                    this.handle.setupClientOptions();   // 处理皮肤设置问题
+            if (config.isDropInventoryOnQuiting()) {
+                // 跨服背包同步插件可能导致假人既丢弃了一份到地上，在重新生成的时候又回来了
+                // 因此在生成的时候清空一次背包
+                // 但无法解决登陆后延迟同步背包的情况
+                this.player.getInventory().clear();
+            }
 
-                    this.teleportToSpawnpoint(option.spawnAt().clone());
-                    this.ticker.runTaskTimer(Main.getInstance(), 0, 1);
-                }));
+            this.player.setInvulnerable(option.invulnerable());
+            this.player.setCollidable(option.collidable());
+            this.player.setCanPickupItems(option.pickupItems());
+            if (option.lookAtEntity()) {
+                actionManager.setAction(player, ActionType.LOOK_AT_NEAREST_ENTITY, ActionSetting.continuous());
+            }
+            if (option.skin()) {
+                skinManager.useDefaultSkin(creator, player);
+            }
+            if (option.replenish()) {
+                replenishManager.setReplenish(player, true);
+            }
+            if (option.autofish()) {
+                autofishManager.setAutofish(player, true);
+            }
+
+            this.network = bridge.createNetwork(address);
+            this.network.placeNewPlayer(Bukkit.getServer(), this.player);
+            this.player.setHealth(Optional.ofNullable(this.player.getAttribute(Attributes.maxHealth()))
+                    .map(AttributeInstance::getValue)
+                    .orElse(20D));    // 恢复生命值
+            this.player.setFoodLevel(20);
+            this.setupName();
+            this.handle.setupClientOptions();   // 处理皮肤设置问题
+
+            this.teleportToSpawnpoint(option.spawnAt().clone());
+            var handle1 = ((CraftPlayer) player).getHandle();
+            this.ticker.start(handle1);
+
+            completableFuture.complete(null);
+        });
+        return completableFuture;
     }
 
     /**
@@ -182,27 +198,43 @@ public class Fakeplayer {
      *
      * @param to 目标位置
      */
-    private void teleportToSpawnpoint(@NotNull Location to) {
+    public void teleportToSpawnpoint(@NotNull Location to) {
         var from = this.player.getLocation();
         if (from.getWorld().equals(to.getWorld())) {
             // 如果生成世界等于目的世界, 则需要穿越一次维度才能获取刷怪能力
             var otherWorld = WorldUtils.getOtherWorld(from.getWorld());
-            if (otherWorld == null || !player.teleport(otherWorld.getSpawnLocation())) {
+            if (otherWorld == null) {
                 this.creator.sendMessage(translatable(
                         "fakeplayer.command.spawn.error.no-mob-spawning-ability",
                         text(player.getName(), WHITE)
                 ).color(GRAY));
+                return;
             }
-        }
 
-        Bukkit.getScheduler().runTask(Main.getInstance(), () -> {
-            if (!EntityUtils.teleportAndSound(player, to)) {
-                this.creator.sendMessage(translatable(
-                        "fakeplayer.command.spawn.error.teleport-failed",
-                        text(player.getName(), WHITE)
-                ).color(GRAY));
-            }
-        });
+            player.teleportAsync(otherWorld.getSpawnLocation())
+                    .thenAccept(success -> {
+                        if (!success) {
+                            this.creator.sendMessage(translatable(
+                                    "fakeplayer.command.spawn.error.no-mob-spawning-ability",
+                                    text(player.getName(), WHITE)
+                            ).color(GRAY));
+                        }
+                    });
+
+
+            Bukkit.getRegionScheduler().run(Main.getInstance(), player.getLocation(), task -> {
+
+               EntityUtils.teleportAndSoundCompletable(player, to).thenAccept(aBoolean -> {
+                    if (!aBoolean) {
+                        this.creator.sendMessage(translatable(
+                                "fakeplayer.command.spawn.error.teleport-failed",
+                                text(player.getName(), WHITE)
+                        ).color(GRAY));
+                    }
+                });
+
+            });
+        }
     }
 
     public boolean isOnline() {

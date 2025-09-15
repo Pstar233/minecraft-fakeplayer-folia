@@ -2,7 +2,9 @@ package io.github.hello09x.fakeplayer.core.entity.action.impl;
 
 import io.github.hello09x.fakeplayer.api.spi.Action;
 import io.github.hello09x.fakeplayer.api.spi.NMSServerPlayer;
+import io.github.hello09x.fakeplayer.core.Main;
 import io.papermc.paper.entity.LookAnchor;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Damageable;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;

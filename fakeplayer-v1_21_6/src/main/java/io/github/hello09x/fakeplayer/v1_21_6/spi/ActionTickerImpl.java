@@ -9,7 +9,7 @@ import io.github.hello09x.fakeplayer.core.entity.action.BaseActionTicker;
 import io.github.hello09x.fakeplayer.v1_21_6.action.AttackAction;
 import io.github.hello09x.fakeplayer.v1_21_6.action.MineAction;
 import io.github.hello09x.fakeplayer.v1_21_6.action.UseAction;
-import org.bukkit.craftbukkit.v1_21_R5.entity.CraftPlayer;
+import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 

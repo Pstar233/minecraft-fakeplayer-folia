@@ -2,7 +2,6 @@ package io.github.hello09x.fakeplayer.v1_21_8.spi;
 
 import io.github.hello09x.fakeplayer.api.spi.*;
 import io.github.hello09x.fakeplayer.core.Main;
-import io.github.hello09x.fakeplayer.v1_21_6.spi.*;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import org.bukkit.World;

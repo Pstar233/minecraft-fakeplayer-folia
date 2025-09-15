@@ -263,7 +263,8 @@ public class FakeplayerConfig extends PluginConfig {
 
     private @NotNull String getNameTemplate(@NotNull FileConfiguration file) {
         var tmpl = file.getString("name-template", "");
-        if (tmpl.startsWith("-") || tmpl.startsWith("@")) {
+        // 这 "-"
+        if (tmpl.startsWith("_") || tmpl.startsWith("@")) {
             log.warning("Invalid name template: " + this.nameTemplate);
             return "";
         }

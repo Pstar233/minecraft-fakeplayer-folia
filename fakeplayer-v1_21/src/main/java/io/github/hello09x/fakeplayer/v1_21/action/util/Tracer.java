@@ -1,11 +1,14 @@
 package io.github.hello09x.fakeplayer.v1_21.action.util;
 
+import io.github.hello09x.fakeplayer.core.Main;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.*;
+import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.awt.*;
 import java.util.function.Predicate;
 
 /**
@@ -72,6 +75,7 @@ public class Tracer {
         double targetDistance = maxSqDistance;
         Entity target = null;
         Vec3 targetHitPos = null;
+
         for (Entity current : world.getEntities(source, box, predicate)) {
             var currentBox = current.getBoundingBox().inflate(current.getPickRadius());
             var currentHit = currentBox.clip(start, end);

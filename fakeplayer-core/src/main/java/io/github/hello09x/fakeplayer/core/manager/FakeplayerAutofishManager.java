@@ -7,6 +7,7 @@ import io.github.hello09x.fakeplayer.api.spi.ActionType;
 import io.github.hello09x.fakeplayer.core.Main;
 import io.github.hello09x.fakeplayer.core.constant.MetadataKeys;
 import io.github.hello09x.fakeplayer.core.manager.action.ActionManager;
+import io.papermc.paper.threadedregions.scheduler.RegionScheduler;
 import net.kyori.adventure.util.Ticks;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -60,9 +61,10 @@ public class FakeplayerAutofishManager implements Listener {
             return;
         }
 
-        Bukkit.getScheduler().runTaskLater(Main.getInstance(), () -> {
+        RegionScheduler regionScheduler = Bukkit.getRegionScheduler();
+        regionScheduler.runDelayed(Main.getInstance(), event.getPlayer().getLocation(), task -> {
             actionManager.setAction(player, ActionType.USE, ActionSetting.once());
-            Bukkit.getScheduler().runTaskLater(Main.getInstance(), () -> {
+            regionScheduler.runDelayed(Main.getInstance(), event.getPlayer().getLocation(), t -> {
                 actionManager.setAction(player, ActionType.USE, ActionSetting.once());
             }, Ticks.TICKS_PER_SECOND);
         }, 1);

@@ -3,9 +3,12 @@ package io.github.hello09x.fakeplayer.v1_21.network;
 import io.github.hello09x.fakeplayer.api.spi.NMSServerGamePacketListener;
 import io.github.hello09x.fakeplayer.core.Main;
 import io.github.hello09x.fakeplayer.core.manager.FakeplayerManager;
+import io.netty.channel.ChannelFutureListener;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
+import net.minecraft.network.protocol.common.ClientboundKeepAlivePacket;
+import net.minecraft.network.protocol.common.ServerboundKeepAlivePacket;
 import net.minecraft.network.protocol.common.custom.DiscardedPayload;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.server.MinecraftServer;
@@ -13,8 +16,10 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.CommonListenerCookie;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.v1_21_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.entity.CraftPlayer;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 import java.util.logging.Logger;
@@ -38,9 +43,12 @@ public class FakeServerGamePacketListenerImpl extends ServerGamePacketListenerIm
 
     @Override
     public void send(Packet<?> packet) {
+        System.out.println("收到包||" + packet.toString());
         if (packet instanceof ClientboundCustomPayloadPacket p) {
+            System.out.println("||1||" + p);
             this.handleCustomPayloadPacket(p);
         } else if (packet instanceof ClientboundSetEntityMotionPacket p) {
+            System.out.println("||2||" + p);
             this.handleClientboundSetEntityMotionPacket(p);
         }
     }
@@ -50,7 +58,8 @@ public class FakeServerGamePacketListenerImpl extends ServerGamePacketListenerIm
      */
     public void handleClientboundSetEntityMotionPacket(@NotNull ClientboundSetEntityMotionPacket packet) {
         if (packet.getId() == this.player.getId() && this.player.hurtMarked) {
-            Bukkit.getScheduler().runTask(Main.getInstance(), () -> {
+            Player p = player.getBukkitEntity();
+            Bukkit.getRegionScheduler().run(Main.getInstance(), p.getLocation(), task -> {
                 this.player.hurtMarked = true;
                 this.player.lerpMotion(packet.getXa(), packet.getYa(), packet.getZa());
             });

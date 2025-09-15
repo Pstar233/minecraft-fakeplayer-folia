@@ -29,9 +29,9 @@ public class SkinCommand extends AbstractCommand {
     @Inject
     public SkinCommand(FakeplayerSkinManager manager) {
         this.manager = manager;
-        Bukkit.getScheduler().runTaskTimer(Main.getInstance(), () -> {
+        Bukkit.getGlobalRegionScheduler().runAtFixedRate(Main.getInstance(), task -> {
             spams.entrySet().removeIf(counter -> counter.getValue().decrementAndGet() <= 0);
-        }, 0, 1);
+        }, 1L, 1L);
     }
 
     /**
@@ -56,7 +56,7 @@ public class SkinCommand extends AbstractCommand {
             this.manager.useOnlineSkinAsync(fake, player)
                         .thenAcceptAsync(success -> {
                             manager.rememberSkin(sender, fake, player);
-                            Bukkit.getScheduler().runTask(Main.getInstance(), () -> {
+                            Bukkit.getGlobalRegionScheduler().run(Main.getInstance(), task -> {
                                 if (success) {
                                     fake.sendMessage(translatable("fakeplayer.command.generic.success"));
                                 }

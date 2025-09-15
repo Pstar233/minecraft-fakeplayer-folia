@@ -6,8 +6,8 @@ import io.github.hello09x.fakeplayer.v1_21.network.FakeConnection;
 import io.github.hello09x.fakeplayer.v1_21.network.FakeServerGamePacketListenerImpl;
 import net.minecraft.server.network.CommonListenerCookie;
 import org.bukkit.Server;
-import org.bukkit.craftbukkit.v1_21_R1.CraftServer;
-import org.bukkit.craftbukkit.v1_21_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.CraftServer;
+import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 

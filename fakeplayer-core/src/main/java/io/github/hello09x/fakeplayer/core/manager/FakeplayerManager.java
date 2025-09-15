@@ -68,13 +68,13 @@ public class FakeplayerManager {
         this.lagMonitor = Executors.newSingleThreadScheduledExecutor();
         this.lagMonitor.scheduleWithFixedDelay(() -> {
                                                    if (Bukkit.getServer().getTPS()[1] < config.getKaleTps()) {
-                                                       Bukkit.getScheduler().runTask(Main.getInstance(), () -> {
+                                                       Bukkit.getGlobalRegionScheduler().run(Main.getInstance(), task -> {
                                                            if (this.removeAll("low tps") > 0) {
                                                                Bukkit.broadcast(translatable("fakeplayer.manager.remove-all-on-low-tps", GRAY, ITALIC));
                                                            }
                                                        });
                                                    }
-                                               }, 0, 60, TimeUnit.SECONDS
+                                               }, 1, 60, TimeUnit.SECONDS
         );
     }
 
@@ -106,6 +106,8 @@ public class FakeplayerManager {
         this.playerList.add(fp);
 
         this.dispatchCommandsEarly(fp, this.config.getPreSpawnCommands());
+
+
         return CompletableFuture
                 .supplyAsync(() -> {
                     var configs = featureManager.getFeatures(creator);

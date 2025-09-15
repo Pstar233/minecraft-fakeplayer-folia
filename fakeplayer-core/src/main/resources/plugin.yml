@@ -4,6 +4,7 @@ main: io.github.hello09x.fakeplayer.core.Main
 api-version: '1.20'
 author: hello09x
 website: 'https://github.com/tanyaofei/minecraft-fakeplayer'
+folia-supported: true
 depend:
   - CommandAPI
 

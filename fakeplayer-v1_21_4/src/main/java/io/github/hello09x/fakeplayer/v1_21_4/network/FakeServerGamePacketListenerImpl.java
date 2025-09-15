@@ -50,7 +50,7 @@ public class FakeServerGamePacketListenerImpl extends ServerGamePacketListenerIm
      */
     public void handleClientboundSetEntityMotionPacket(@NotNull ClientboundSetEntityMotionPacket packet) {
         if (packet.getId() == this.player.getId() && this.player.hurtMarked) {
-            Bukkit.getScheduler().runTask(Main.getInstance(), () -> {
+            Bukkit.getRegionScheduler().run(Main.getInstance(), player.getBukkitEntity().getLocation(), task -> {
                 this.player.hurtMarked = true;
                 this.player.lerpMotion(packet.getXa(), packet.getYa(), packet.getZa());
             });

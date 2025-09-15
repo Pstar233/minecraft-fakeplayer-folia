@@ -156,7 +156,7 @@ public class FakeplayerReplenishManager implements Listener {
         var requires = item.clone();
         item = null;    // 以防下面的代码用到了这个值
 
-        Bukkit.getScheduler().runTaskLater(Main.getInstance(), () -> {
+        Bukkit.getRegionScheduler().runDelayed(Main.getInstance(), target.getLocation(), task -> {
             if (!target.isOnline()) {
                 return;
             }
@@ -224,7 +224,7 @@ public class FakeplayerReplenishManager implements Listener {
                 continue;
             }
 
-            Bukkit.getScheduler().runTaskLater(Main.getInstance(), () -> {
+            Bukkit.getRegionScheduler().runDelayed(Main.getInstance(), target.getLocation(), task -> {
                 var view = target.getOpenInventory();
                 var inv = view.getTopInventory();
                 if (inv.getType() != InventoryType.CHEST) {

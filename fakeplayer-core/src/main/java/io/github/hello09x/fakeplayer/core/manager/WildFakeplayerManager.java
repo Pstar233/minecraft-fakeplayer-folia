@@ -43,7 +43,7 @@ public class WildFakeplayerManager implements PluginMessageListener {
     public WildFakeplayerManager(FakeplayerManager manager, FakeplayerConfig config) {
         this.manager = manager;
         this.config = config;
-        Bukkit.getScheduler().runTaskTimer(Main.getInstance(), this::cleanup, 0, CLEANUP_PERIOD);
+        Bukkit.getGlobalRegionScheduler().runAtFixedRate(Main.getInstance(), task -> cleanup(), 1, CLEANUP_PERIOD);
     }
 
     @Override

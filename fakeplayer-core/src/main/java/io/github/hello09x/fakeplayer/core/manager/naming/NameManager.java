@@ -114,7 +114,7 @@ public class NameManager {
 
     /**
      * 通过自定义名称获取序列名
-     *
+     * 玩家名称中间的-
      * @param name 自定义名称
      * @return 序列名
      */
@@ -122,10 +122,11 @@ public class NameManager {
         if (StringUtils.isNotBlank(config.getNamePrefix())) {
             name = config.getNamePrefix().trim() + name;
         }
-        if (name.startsWith("-")) {
+        // 这 "-"
+        if (name.startsWith("_")) {
             throw new IllegalCustomNameException(translatable(
                     "fakeplayer.spawn.error.name.start-with-illegal-character",
-                    text("-", WHITE)
+                    text("", WHITE)
             ).color(RED));
         }
 

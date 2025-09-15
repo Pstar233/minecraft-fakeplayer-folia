@@ -127,20 +127,22 @@ public class FakeplayerListener implements Listener {
                 creator.sendMessage(translatable(
                         "fakeplayer.listener.death.notify",
                         text(player.getName(), GOLD),
-                        text("/fp respawn", DARK_GREEN, UNDERLINED).clickEvent(runCommand("/fp respawn " + player.getName()))
+                        text("/fp respawn", DARK_GREEN, UNDERLINED)
+                                .clickEvent(runCommand("/fp respawn " + player.getName()))
                 ).color(RED));
             }
             return;
         }
 
-        // 有一些跨服同步插件会退出时同步生命值, 假人重新生成的时候同步为 0
-        // 因此在死亡时将生命值设置恢复满血先
-        Optional.ofNullable(player.getAttribute(Attribute.MAX_HEALTH))
+        // 有一些跨服同步插件会退出时同步生命值, 假人重新生成的时候同步为 0 // 因此在死亡时将生命值设置恢复满血先
+        Optional.ofNullable(player.getAttribute(Attribute.valueOf("GENERIC_MAX_HEALTH")))
                 .map(AttributeInstance::getValue)
                 .ifPresent(player::setHealth);
+
         event.setCancelled(true);
         manager.remove(event.getPlayer().getName(), event.deathMessage());
     }
+
 
     /**
      * 退出游戏掉落背包
@@ -154,7 +156,11 @@ public class FakeplayerListener implements Listener {
 
         try {
             if (manager.getCreator(target) instanceof Player creator && manager.countByCreator(creator) == 1) {
-                Bukkit.getScheduler().runTaskLater(Main.getInstance(), creator::updateCommands, 1); // 需要下 1 tick 移除后才正确刷新
+
+                // 需要下 1 tick 移除后才正确刷新
+                Bukkit.getRegionScheduler().runDelayed(Main.getInstance(), target.getLocation(), task -> {
+                    creator.updateCommands();
+                }, 1);
             }
         } finally {
             manager.cleanup(target);

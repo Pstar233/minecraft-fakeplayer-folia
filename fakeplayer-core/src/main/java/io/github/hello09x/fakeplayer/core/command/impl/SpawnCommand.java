@@ -8,6 +8,7 @@ import io.github.hello09x.devtools.command.exception.HandleCommandException;
 import io.github.hello09x.fakeplayer.core.Main;
 import io.github.hello09x.fakeplayer.core.entity.FakeplayerTicker;
 import io.github.hello09x.fakeplayer.core.util.Mth;
+import io.papermc.paper.threadedregions.scheduler.GlobalRegionScheduler;
 import net.kyori.adventure.text.Component;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Bukkit;
@@ -31,15 +32,15 @@ import static net.kyori.adventure.text.format.NamedTextColor.*;
 public class SpawnCommand extends AbstractCommand {
 
     private final static DateTimeFormatter REMOVE_AT_FORMATTER = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm");
-    private final static BukkitScheduler scheduler = Bukkit.getScheduler();
+    private final static GlobalRegionScheduler scheduler = Bukkit.getGlobalRegionScheduler();
 
     private static String toLocationString(@NotNull Location location) {
         return location.getWorld().getName()
                 + ": "
                 + StringUtils.joinWith(", ",
-                                       Mth.floor(location.getX(), 0.5),
-                                       Mth.floor(location.getY(), 0.5),
-                                       Mth.floor(location.getZ(), 0.5));
+                Mth.floor(location.getX(), 0.5),
+                Mth.floor(location.getY(), 0.5),
+                Mth.floor(location.getZ(), 0.5));
     }
 
     /**
@@ -47,6 +48,13 @@ public class SpawnCommand extends AbstractCommand {
      */
     @HandleCommandException
     public void spawn(@NotNull CommandSender sender, @NotNull CommandArguments args) {
+        if (sender instanceof Player player) {
+            if (player.getWorld().getEnvironment() != World.Environment.NORMAL){
+                player.sendMessage(Component.text("§7假人只能在主世界生成，如果你要在其他世界使用的话你需要 /fp tps 吧假人tp过来。"));
+                return;
+            }
+        }
+
         var name = (String) args.get("name");
         if (name != null && name.isEmpty()) {
             name = null;
@@ -70,41 +78,41 @@ public class SpawnCommand extends AbstractCommand {
 
         var removedAt = Optional.ofNullable(config.getLifespan()).map(lifespan -> LocalDateTime.now().plus(lifespan)).orElse(null);
         manager.spawnAsync(sender, name, spawnpoint, Optional.ofNullable(config.getLifespan()).map(Duration::toMillis).orElse(FakeplayerTicker.NON_REMOVE_AT))
-               .thenAcceptAsync(player -> {
-                   if (player == null) {
-                       return;
-                   }
-                   Component message;
-                   if (removedAt == null) {
-                       message = translatable(
-                               "fakeplayer.command.spawn.success.without-lifespan",
-                               text(player.getName(), WHITE),
-                               text(toLocationString(spawnpoint), WHITE)
-                       ).color(GRAY);
-                   } else {
-                       message = translatable(
-                               "fakeplayer.command.spawn.success.with-lifespan",
-                               text(player.getName(), WHITE),
-                               text(toLocationString(spawnpoint), WHITE),
-                               text(REMOVE_AT_FORMATTER.format(removedAt))
-                       ).color(GRAY);
-                   }
-                   scheduler.runTask(Main.getInstance(), () -> {
-                       sender.sendMessage(message);
-                       if (sender instanceof Player p && manager.countByCreator(sender) == 1) {
-                           // 有些命令在有假人的时候才会显示, 因此需要强制刷新一下
-                           p.updateCommands();
-                       }
-                   });
-               }).exceptionally(e -> {
-                   if (Throwables.getRootCause(e) instanceof CommandException ce) {
-                       scheduler.runTask(Main.getInstance(), () -> sender.sendMessage(ce.component()));
-                   } else {
-                       scheduler.runTask(Main.getInstance(), () -> sender.sendMessage(translatable("fakeplayer.command.spawn.error.unknown", RED)));
-                       log.severe(Throwables.getStackTraceAsString(e));
-                   }
-                   return null;
-               });
+                .thenAcceptAsync(player -> {
+                    if (player == null) {
+                        return;
+                    }
+                    Component message;
+                    if (removedAt == null) {
+                        message = translatable(
+                                "fakeplayer.command.spawn.success.without-lifespan",
+                                text(player.getName(), WHITE),
+                                text(toLocationString(spawnpoint), WHITE)
+                        ).color(GRAY);
+                    } else {
+                        message = translatable(
+                                "fakeplayer.command.spawn.success.with-lifespan",
+                                text(player.getName(), WHITE),
+                                text(toLocationString(spawnpoint), WHITE),
+                                text(REMOVE_AT_FORMATTER.format(removedAt))
+                        ).color(GRAY);
+                    }
+                    scheduler.run(Main.getInstance(), task -> {
+                        sender.sendMessage(message);
+                        if (sender instanceof Player p && manager.countByCreator(sender) == 1) {
+                            // 有些命令在有假人的时候才会显示, 因此需要强制刷新一下
+                            p.updateCommands();
+                        }
+                    });
+                }).exceptionally(e -> {
+                    if (Throwables.getRootCause(e) instanceof CommandException ce) {
+                        scheduler.run(Main.getInstance(), task -> sender.sendMessage(ce.component()));
+                    } else {
+                        scheduler.run(Main.getInstance(), task -> sender.sendMessage(translatable("fakeplayer.command.spawn.error.unknown", RED)));
+                        log.severe(Throwables.getStackTraceAsString(e));
+                    }
+                    return null;
+                });
     }
 
 

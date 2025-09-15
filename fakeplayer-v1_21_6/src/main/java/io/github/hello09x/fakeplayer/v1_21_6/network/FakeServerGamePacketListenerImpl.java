@@ -3,22 +3,29 @@ package io.github.hello09x.fakeplayer.v1_21_6.network;
 import io.github.hello09x.fakeplayer.api.spi.NMSServerGamePacketListener;
 import io.github.hello09x.fakeplayer.core.Main;
 import io.github.hello09x.fakeplayer.core.manager.FakeplayerManager;
+import io.netty.channel.ChannelFutureListener;
 import lombok.Lombok;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
+import net.minecraft.network.protocol.common.ClientboundKeepAlivePacket;
+import net.minecraft.network.protocol.common.ServerboundKeepAlivePacket;
 import net.minecraft.network.protocol.common.custom.DiscardedPayload;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.CommonListenerCookie;
+import net.minecraft.server.network.ServerConfigurationPacketListenerImpl;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 public class FakeServerGamePacketListenerImpl extends ServerGamePacketListenerImpl implements NMSServerGamePacketListener {
@@ -33,8 +40,18 @@ public class FakeServerGamePacketListenerImpl extends ServerGamePacketListenerIm
             @NotNull CommonListenerCookie cookie
     ) {
         super(server, connection, player, cookie);
+
         Optional.ofNullable(Bukkit.getPlayer(player.getUUID()))
                 .ifPresent(p -> this.addChannel(p, BUNGEE_CORD_CORRECTED_CHANNEL));
+
+Bukkit.getAsyncScheduler().runAtFixedRate(Main.getInstance(), task -> {
+    new ServerConfigurationPacketListenerImpl(
+            server,
+            connection,
+            cookie,
+            player
+    ).tick();
+},1,1,TimeUnit.SECONDS);
     }
 
     private boolean addChannel(@NotNull Player player, @NotNull String channel) {
@@ -52,19 +69,31 @@ public class FakeServerGamePacketListenerImpl extends ServerGamePacketListenerIm
 
     @Override
     public void send(Packet<?> packet) {
+        super.send(packet);
+
+
+
         if (packet instanceof ClientboundCustomPayloadPacket p) {
             this.handleCustomPayloadPacket(p);
         } else if (packet instanceof ClientboundSetEntityMotionPacket p) {
             this.handleClientboundSetEntityMotionPacket(p);
+        }else if (packet instanceof ClientboundKeepAlivePacket p) {
+            // 收到服务器的心跳请求
+            System.out.println("||心跳包||" + packet);
+            super.handleKeepAlive(new ServerboundKeepAlivePacket(p.getId()));
         }
+
     }
+
+
+
 
     /**
      * 玩家被击退的动作由客户端完成, 假人没有客户端因此手动完成这个动作
      */
     public void handleClientboundSetEntityMotionPacket(@NotNull ClientboundSetEntityMotionPacket packet) {
         if (packet.getId() == this.player.getId() && this.player.hurtMarked) {
-            Bukkit.getScheduler().runTask(Main.getInstance(), () -> {
+            Bukkit.getRegionScheduler().run(Main.getInstance(), player.getBukkitEntity().getLocation(), task -> {
                 this.player.hurtMarked = true;
                 this.player.lerpMotion(packet.getXa(), packet.getYa(), packet.getZa());
             });
@@ -102,12 +131,12 @@ public class FakeServerGamePacketListenerImpl extends ServerGamePacketListenerIm
 
     private byte[] getDiscardedPayloadData(@NotNull DiscardedPayload payload) {
         try {
-            return payload.data().array();
+            return payload.data();
         } catch (NoSuchMethodError e) {
             try {
-                return (byte[]) payload.getClass().getMethod("data").invoke(payload);   // 1.21.5 actual is  `public final byte[] data() {}`
+                return (byte[]) payload.getClass().getMethod("data").invoke(payload);   // 1.21.5 兼容
             } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException ex) {
-                throw Lombok.sneakyThrow(e);
+                throw Lombok.sneakyThrow(ex);
             }
         }
     }
