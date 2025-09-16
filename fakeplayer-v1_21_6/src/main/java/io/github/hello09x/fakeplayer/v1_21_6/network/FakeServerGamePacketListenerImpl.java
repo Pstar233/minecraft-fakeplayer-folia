@@ -77,12 +77,7 @@ Bukkit.getAsyncScheduler().runAtFixedRate(Main.getInstance(), task -> {
             this.handleCustomPayloadPacket(p);
         } else if (packet instanceof ClientboundSetEntityMotionPacket p) {
             this.handleClientboundSetEntityMotionPacket(p);
-        }else if (packet instanceof ClientboundKeepAlivePacket p) {
-            // 收到服务器的心跳请求
-            System.out.println("||心跳包||" + packet);
-            super.handleKeepAlive(new ServerboundKeepAlivePacket(p.getId()));
         }
-
     }
 
 

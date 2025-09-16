@@ -32,7 +32,7 @@ public class ActionManager {
     @Inject
     public ActionManager(NMSBridge bridge) {
         this.bridge = bridge;
-        Bukkit.getAsyncScheduler().runAtFixedRate(Main.getInstance(), task -> tick2(), 50, 50, TimeUnit.MILLISECONDS);
+        Bukkit.getAsyncScheduler().runAtFixedRate(Main.getInstance(), task -> tick(), 50, 50, TimeUnit.MILLISECONDS);
     }
 
     public boolean hasActiveAction(

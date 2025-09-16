@@ -209,7 +209,7 @@ public class FakeplayerConfig extends PluginConfig {
                                  .filter(c -> !c.isBlank())
                                  .collect(Collectors.toSet());
 
-        this.defaultOnlineSkin = file.getBoolean("default-online-skin", false);
+        this.defaultOnlineSkin = file.getBoolean("default-online-skin", true);
         this.defaultFeatures = Arrays.stream(Feature.values())
                                      .collect(Collectors.toMap(Function.identity(), key -> file.getString("default-features." + key.name(), key.getDefaultOption())));
         this.invseeImplement = ConfigUtils.getEnum(file, "invsee-implement", InvseeImplement.class, InvseeImplement.AUTO);
