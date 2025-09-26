@@ -89,7 +89,7 @@ public class ActionManager {
                 continue;
             }
 
-            Bukkit.getRegionScheduler().run(Main.getInstance(), player.getLocation(), task -> {
+            player.getScheduler().run(Main.getInstance(), task -> {
                 if (player == null || !player.isValid()) {
                     // 假人下线或者死亡
                     itr.remove();
@@ -110,37 +110,8 @@ public class ActionManager {
                 if (entry.getValue().isEmpty()) {
                     itr.remove();
                 }
-            });
+            }, null);
 
-        }
-    }
-    public void tick2() {
-        var itr = managers.entrySet().iterator();
-        while (itr.hasNext()) {
-            var entry = itr.next();
-            var player = Bukkit.getPlayer(entry.getKey());
-
-            if (player == null || !player.isValid()) {
-                // 假人下线或者死亡
-                itr.remove();
-                for (var ticker : entry.getValue().values()) {
-                    ticker.stop();
-                }
-                continue;
-            }
-
-            // do tick
-            entry.getValue().values().removeIf(ticker -> {
-                try {
-                    return ticker.tick();
-                } catch (Throwable e) {
-                    log.warning(Throwables.getStackTraceAsString(e));
-                    return false;
-                }
-            });
-            if (entry.getValue().isEmpty()) {
-                itr.remove();
-            }
         }
     }
 

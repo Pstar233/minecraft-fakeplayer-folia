@@ -130,6 +130,7 @@ public class Fakeplayer {
             var address = ipGen.next();
             this.player.setMetadata(MetadataKeys.SPAWNED_AT, new FixedMetadataValue(Main.getInstance(), Bukkit.getCurrentTick()));
 
+            //异步触发事件
             Bukkit.getAsyncScheduler().runNow(Main.getInstance(), task1 -> {
                 var event = this.callPreLoginEvent(address);
                 if (event.getLoginResult() != AsyncPlayerPreLoginEvent.Result.ALLOWED) {
