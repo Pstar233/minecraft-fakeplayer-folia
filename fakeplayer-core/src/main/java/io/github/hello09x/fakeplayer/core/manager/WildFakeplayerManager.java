@@ -5,12 +5,14 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import io.github.hello09x.fakeplayer.core.Main;
 import io.github.hello09x.fakeplayer.core.config.FakeplayerConfig;
+import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.messaging.PluginMessageListener;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -37,13 +39,17 @@ public class WildFakeplayerManager implements PluginMessageListener {
 
     private final FakeplayerManager manager;
     private final FakeplayerConfig config;
+    private final int delay;
     private final Map<String, AtomicInteger> offline = new HashMap<>();
+    private Map<String, String> removeTask = new HashMap<>();
 
     @Inject
     public WildFakeplayerManager(FakeplayerManager manager, FakeplayerConfig config) {
         this.manager = manager;
         this.config = config;
+        this.delay = config.getFollowtheofflineregularly();
         Bukkit.getGlobalRegionScheduler().runAtFixedRate(Main.getInstance(), task -> cleanup(), 1, CLEANUP_PERIOD);
+        Bukkit.getAsyncScheduler().runAtFixedRate(Main.getInstance(), task -> removeTask(), delay, delay, TimeUnit.MINUTES);
     }
 
     @Override
@@ -80,8 +86,8 @@ public class WildFakeplayerManager implements PluginMessageListener {
     public void cleanup0(@NotNull Set<String> online) {
         @SuppressWarnings("all")
         var group = manager.getAll()
-                           .stream()
-                           .collect(Collectors.groupingBy(manager::getCreatorName));
+                .stream()
+                .collect(Collectors.groupingBy(manager::getCreatorName));
 
         for (var entry : group.entrySet()) {
             var creator = entry.getKey();
@@ -99,18 +105,43 @@ public class WildFakeplayerManager implements PluginMessageListener {
             }
 
             for (var target : targets) {
-                manager.remove(target.getName(), "Creator offline");
+                if (delay == 0) {
+                    manager.remove(target.getName(), "Creator offline");
+                    log.info("%s is offline more than %d ticks, removing %d fake players".formatted(
+                            creator,
+                            CLEANUP_PERIOD * CLEANUP_THRESHOLD,
+                            targets.size())
+                    );
+                } else {
+                    removeTask.put(creator, target.getName());
+                }
             }
-            log.info("%s is offline more than %d ticks, removing %d fake players".formatted(
-                    creator,
-                    CLEANUP_PERIOD * CLEANUP_THRESHOLD,
-                    targets.size())
-            );
+
         }
 
         for (var player : online) {
             offline.remove(player);
         }
+    }
+
+    public void removeTask() {
+        Set<String> creators = removeTask.keySet();
+        for (String creator : creators) {
+            if (Bukkit.getPlayerExact(creator) != null) {
+                continue;
+            }
+
+            String target = removeTask.get(creator);
+            Bukkit.getGlobalRegionScheduler().run(Main.getInstance(), task -> manager.remove(target, "Creator offline"));
+
+            log.info("%s 离线时间超过 %d 分钟，删除了 %s 假玩家".formatted(
+                    creator,
+                    delay,
+                    target)
+            );
+        }
+
+        removeTask.clear();
     }
 
     /**

@@ -72,6 +72,11 @@ public class FakeplayerConfig extends PluginConfig {
     private boolean followQuiting;
 
     /**
+     * 创建者玩家下线时是否定时跟随下线
+     */
+    private int followtheofflineregularly;
+
+    /**
      * 是否探测 IP
      */
     private boolean detectIp;
@@ -182,6 +187,8 @@ public class FakeplayerConfig extends PluginConfig {
 
     @Override
     protected void reload(@NotNull FileConfiguration file) {
+        this.followtheofflineregularly = file.getInt("follow-the-offline-regularly", 0);
+
         this.playerLimit = maxIfZero(file.getInt("player-limit", 1));
         this.serverLimit = maxIfZero(file.getInt("server-limit", 1000));
         this.followQuiting = file.getBoolean("follow-quiting", true);

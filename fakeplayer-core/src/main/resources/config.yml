@@ -115,6 +115,12 @@ prevent-kicking: ON_SPAWNING
 # Define whether fake personas will be removed when the creator quited.
 follow-quiting: true
 
+# 定时跟随下线
+# 假人创建者下线时启用定时跟着下线
+# 如果玩家只是切换服务器, 那么不会触发跟随下线
+# 设置成 0 为关闭 单位 （分钟）
+# follow-quiting 必须为 true
+follow-the-offline-regularly: 0
 
 # 退出时是否丢弃背包物品
 # Define whether fake players will drop items from their inventory when they remove.
