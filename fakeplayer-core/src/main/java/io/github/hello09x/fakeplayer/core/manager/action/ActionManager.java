@@ -40,9 +40,9 @@ public class ActionManager {
             @NotNull ActionType action
     ) {
         return Optional.ofNullable(this.managers.get(player.getUniqueId()))
-                       .map(manager -> manager.get(action))
-                       .filter(ac -> ac.getSetting().remains > 0)
-                       .isPresent();
+                .map(manager -> manager.get(action))
+                .filter(ac -> ac.getSetting().remains > 0)
+                .isPresent();
     }
 
     public @NotNull @Unmodifiable Set<ActionType> getActiveActions(@NotNull Player player) {
@@ -52,10 +52,10 @@ public class ActionManager {
         }
 
         return manager.entrySet()
-                      .stream()
-                      .filter(actions -> actions.getValue().getSetting().remains > 0)
-                      .map(Map.Entry::getKey)
-                      .collect(Collectors.toSet());
+                .stream()
+                .filter(actions -> actions.getValue().getSetting().remains > 0)
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toSet());
     }
 
     public void setAction(
@@ -81,24 +81,20 @@ public class ActionManager {
     }
 
     public void tick() {
-        var itr = managers.entrySet().iterator();
-        while (itr.hasNext()) {
-            var entry = itr.next();
+
+        var snapshot = new ArrayList<>(managers.entrySet());
+
+        for (var entry : snapshot) {
             var player = Bukkit.getPlayer(entry.getKey());
-            if (player == null || !player.isOnline()){
-                continue;
-            }
+            if (player == null || !player.isOnline()) continue;
 
             player.getScheduler().run(Main.getInstance(), task -> {
-                if (player == null || !player.isValid()) {
-                    // 假人下线或者死亡
-                    itr.remove();
-                    for (var ticker : entry.getValue().values()) {
-                        ticker.stop();
-                    }
+                if (!player.isValid()) {
+                    managers.remove(entry.getKey());
+                    entry.getValue().values().forEach(ActionTicker::stop);
+                    return;
                 }
 
-                // do tick
                 entry.getValue().values().removeIf(ticker -> {
                     try {
                         return ticker.tick();
@@ -107,11 +103,11 @@ public class ActionManager {
                         return false;
                     }
                 });
+
                 if (entry.getValue().isEmpty()) {
-                    itr.remove();
+                    managers.remove(entry.getKey());
                 }
             }, null);
-
         }
     }
 

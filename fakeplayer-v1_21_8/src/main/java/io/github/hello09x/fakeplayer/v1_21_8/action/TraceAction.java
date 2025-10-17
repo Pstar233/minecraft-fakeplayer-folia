@@ -4,6 +4,9 @@ import io.github.hello09x.fakeplayer.api.spi.Action;
 import io.github.hello09x.fakeplayer.v1_21_8.action.util.Tracer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.HitResult;
+import org.bukkit.Bukkit;
+import org.bukkit.craftbukkit.entity.CraftPlayer;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
