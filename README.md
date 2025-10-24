@@ -21,7 +21,7 @@ This is a server side plugin inspired by [Carpet-Mod](https://github.com/gnembon
 
 ## Requirements
 
-+ [Paper](https://papermc.io) or [Purpur](http://purpurmc.org) software
++ [Folia-1.21.8](https://papermc.io/software/folia/) software
 + [CommandAPI](https://commandapi.jorel.dev) Plugin (Any version **except** `10.0.0`)
 
 ## Config file

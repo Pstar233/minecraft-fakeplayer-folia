@@ -1,4 +1,7 @@
 # FakePlayer - 假人插件
++ 目前我只对1.21.8做了兼容。
++ 自行构建需要替换 devtools
++ 替换方法： 将插件构建好，并使用 7Z 解压工具打开jar包，切换到 minecraft-fakeplayer\target\fakeplayer-0.3.18.jar\io\github\hello09x 路径，删除 devtools 文件。然后从官方仓库下载 minecraft-fakeplayer 插件，然后按照原来的方式找到 devtools 文件复制过来.
 
 [English](README.md) | 简体中文
 
@@ -6,7 +9,7 @@
 
 ### 支持版本
 
-仅支持 `Paper` 及其下游如 (`Purpur`) 核心，所有测试均在 `Purpur` 进行，因此 `Purpur` 的兼容性最高
+仅支持 `Folia-1.21.8` 及其下游如 (`Luminol`) 核心，所有测试均在 `Folia` 进行，因此 `Folia` 的兼容性最高
 
 要求使用 JAVA 21 及以上
 
