@@ -1,4 +1,7 @@
 # FakePlayer
++ 目前我只对1.21.8做了兼容。
++ 自行构建需要替换 devtools 
++ 替换方法： 将插件构建好，并使用 7Z 解压工具打开jar包，切换到 minecraft-fakeplayer\target\fakeplayer-0.3.18.jar\io\github\hello09x 路径，删除 devtools 文件。然后从官方仓库下载 minecraft-fakeplayer 插件，然后按照原来的方式找到 devtools 文件复制过来.
 
 ![BANNER_IMAGE](.github/README/BANNER.png)
 

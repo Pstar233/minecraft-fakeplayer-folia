@@ -1,5 +1,7 @@
 package io.github.hello09x.fakeplayer.api.spi;
 
+import java.util.concurrent.CompletableFuture;
+
 public interface Action {
 
     /**
@@ -7,6 +9,10 @@ public interface Action {
      *
      * @return 是否有做出行动
      */
+    default CompletableFuture<Boolean> CompletableFutureTick() {
+        return null;
+    }
+
     boolean tick();
 
     /**

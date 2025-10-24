@@ -55,10 +55,14 @@ public abstract class BaseActionTicker implements ActionTicker {
         }
 
         try {
-            if (this.action.tick()) {
-                if (this.setting.remains > 0) {
-                    this.setting.remains--;
-                }
+            if (action.CompletableFutureTick() != null){
+                action.CompletableFutureTick().thenAccept(bridge -> {
+                    if (bridge) {
+                        if (this.setting.remains > 0) {
+                            this.setting.remains--;
+                        }
+                    }
+                });
             }
         } finally {
             // 声音更新抑制器会抛出异常, 但同样需要进入冷却

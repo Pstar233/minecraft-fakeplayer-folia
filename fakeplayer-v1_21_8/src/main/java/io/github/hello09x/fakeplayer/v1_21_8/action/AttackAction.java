@@ -5,6 +5,8 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 
+import java.util.concurrent.CompletableFuture;
+
 
 public class AttackAction extends TraceAction {
 
@@ -17,22 +19,31 @@ public class AttackAction extends TraceAction {
 
 
     @Override
+    public CompletableFuture<Boolean> CompletableFutureTick() {
+        CompletableFuture<Boolean> completableFuture = new CompletableFuture<>();
+        getTarget().thenAccept(hitResult -> {
+            var hit = hitResult;
+            if (hit == null) {
+                completableFuture.complete(false);
+            }
+
+            if (hit.getType() != HitResult.Type.ENTITY) {
+                completableFuture.complete(false);
+            }
+
+            var entityHit = (EntityHitResult) hit;
+            player.attack(entityHit.getEntity());
+            player.swing(InteractionHand.MAIN_HAND);
+            player.resetAttackStrengthTicker();
+            player.resetLastActionTime();
+            completableFuture.complete(true);
+        });
+        return completableFuture;
+    }
+
+    @Override
     public boolean tick() {
-        var hit = this.getTarget();
-        if (hit == null) {
-            return false;
-        }
-
-        if (hit.getType() != HitResult.Type.ENTITY) {
-            return false;
-        }
-
-        var entityHit = (EntityHitResult) hit;
-        player.attack(entityHit.getEntity());
-        player.swing(InteractionHand.MAIN_HAND);
-        player.resetAttackStrengthTicker();
-        player.resetLastActionTime();
-        return true;
+        return false;
     }
 
     @Override
