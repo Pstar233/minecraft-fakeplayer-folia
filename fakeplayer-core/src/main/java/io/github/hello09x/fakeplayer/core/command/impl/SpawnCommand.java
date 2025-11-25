@@ -48,12 +48,15 @@ public class SpawnCommand extends AbstractCommand {
      */
     @HandleCommandException
     public void spawn(@NotNull CommandSender sender, @NotNull CommandArguments args) {
+
+        /**
         if (sender instanceof Player player) {
             if (player.getWorld().getEnvironment() != World.Environment.NORMAL){
                 player.sendMessage(Component.text("§7假人只能在主世界生成，如果你要在其他世界使用的话你需要 /fp tps 吧假人tp过来。"));
                 return;
             }
         }
+         */
 
         var name = (String) args.get("name");
         if (name != null && name.isEmpty()) {

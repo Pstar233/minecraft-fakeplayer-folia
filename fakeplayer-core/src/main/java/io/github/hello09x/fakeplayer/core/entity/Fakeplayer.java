@@ -201,9 +201,11 @@ public class Fakeplayer {
      */
     public void teleportToSpawnpoint(@NotNull Location to) {
         var from = this.player.getLocation();
+        System.out.println("触发：teleportToSpawnpoint");
         if (from.getWorld().equals(to.getWorld())) {
             // 如果生成世界等于目的世界, 则需要穿越一次维度才能获取刷怪能力
             var otherWorld = WorldUtils.getOtherWorld(from.getWorld());
+            System.out.println("otherWorld: "+otherWorld);
             if (otherWorld == null) {
                 this.creator.sendMessage(translatable(
                         "fakeplayer.command.spawn.error.no-mob-spawning-ability",
@@ -221,21 +223,20 @@ public class Fakeplayer {
                             ).color(GRAY));
                         }
                     });
-
-
-            Bukkit.getRegionScheduler().run(Main.getInstance(), player.getLocation(), task -> {
-
-               EntityUtils.teleportAndSoundCompletable(player, to).thenAccept(aBoolean -> {
-                    if (!aBoolean) {
-                        this.creator.sendMessage(translatable(
-                                "fakeplayer.command.spawn.error.teleport-failed",
-                                text(player.getName(), WHITE)
-                        ).color(GRAY));
-                    }
-                });
-
-            });
         }
+
+        Bukkit.getRegionScheduler().run(Main.getInstance(), player.getLocation(), task -> {
+
+            EntityUtils.teleportAndSoundCompletable(player, to).thenAccept(aBoolean -> {
+                if (!aBoolean) {
+                    this.creator.sendMessage(translatable(
+                            "fakeplayer.command.spawn.error.teleport-failed",
+                            text(player.getName(), WHITE)
+                    ).color(GRAY));
+                }
+            });
+
+        });
     }
 
     public boolean isOnline() {

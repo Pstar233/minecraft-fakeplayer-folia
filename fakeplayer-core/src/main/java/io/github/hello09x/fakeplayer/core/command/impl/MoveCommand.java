@@ -3,6 +3,9 @@ package io.github.hello09x.fakeplayer.core.command.impl;
 import com.google.inject.Singleton;
 import dev.jorel.commandapi.executors.CommandExecutor;
 import io.github.hello09x.fakeplayer.core.Main;
+import io.github.hello09x.fakeplayer.core.entity.Fakeplayer;
+import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
+import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.Range;
@@ -14,7 +17,7 @@ import java.util.UUID;
 @Singleton
 public class MoveCommand extends AbstractCommand {
 
-    private final Map<UUID, BukkitTask> stopTasks = new HashMap<>();
+    private final Map<UUID, ScheduledTask> stopTasks = new HashMap<>();
 
     /**
      * 假人移动
@@ -37,19 +40,15 @@ public class MoveCommand extends AbstractCommand {
             }
 
             var fakeId = fake.getUniqueId();
-            var stopping = new BukkitRunnable() {
-                @Override
-                public void run() {
-                    handle.setXxa(0);
-                    handle.setZza(0);
-                    var self = stopTasks.get(fakeId);
-                    if (self != null && self.getTaskId() == this.getTaskId()) {
-                        stopTasks.remove(fakeId);
-                    }
-                }
-            };
 
-            this.stopTasks.put(fakeId, stopping.runTaskLater(Main.getInstance(), fake.isSprinting() ? 40 : 20));
+            this.stopTasks.put(fakeId, handle.getPlayer().getScheduler().runDelayed(Main.getInstance(), task1 -> {
+                handle.setXxa(0);
+                handle.setZza(0);
+                var self = stopTasks.get(fakeId);
+                if (self != null) {
+                    stopTasks.remove(fakeId);
+                }
+            }, null, fake.isSprinting() ? 40 : 20));
         };
     }
 

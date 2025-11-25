@@ -96,18 +96,20 @@ public class WildFakeplayerManager implements PluginMessageListener {
 
             var targets = entry.getValue();
             if (targets.isEmpty() || online.contains(creator)) {
+
+                //如果玩家在线那就尝试取消任务，删除数据
+                if (removeTask.get(creator) != null){
+                    removeTask.get(creator).cancel();
+                    removeTask.remove(creator);
+                }
                 continue;
             }
 
             if (offline.computeIfAbsent(creator, x -> new AtomicInteger()).incrementAndGet() < CLEANUP_THRESHOLD) {
                 continue;
             }
-            Player player = Bukkit.getPlayerExact(creator);
-            if (player != null){
-                removeTask.get(player.getName()).cancel();
-                removeTask.remove(player.getName());
-            }
-            if (delay == 0) {
+
+            if (delay <= 0) {
                 for (var target : targets) {
                     manager.remove(target.getName(), "Creator offline");
                     log.info("%s is offline more than %d ticks, removing %d fake players".formatted(
@@ -116,6 +118,7 @@ public class WildFakeplayerManager implements PluginMessageListener {
                             targets.size())
                     );
                 }
+
             }else {
                 if (removeTask.containsKey(creator)){
                     return;
@@ -130,15 +133,15 @@ public class WildFakeplayerManager implements PluginMessageListener {
                                 delay,
                                 targets.size())
                         );
-                        removeTask.remove(creator);
                     }
+                    removeTask.remove(creator);
                 }, delay, TimeUnit.MINUTES));
             }
 
         }
 
-        for (var player : online) {
-            offline.remove(player);
+        for (var p : online) {
+            offline.remove(p);
         }
     }
 
