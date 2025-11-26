@@ -50,5 +50,5 @@ jobs:
             
            Auto-generated release for commit ${{ github.sha }}.
           token: ${{ secrets.GITHUB_TOKEN }}
-          artifacts: "build/libs/*.jar"
+          artifacts: "target/*.jar"
           artifactErrorsFailBuild: true
