@@ -1,0 +1,157 @@
+name: fakeplayer
+version: '${revision}'
+main: io.github.hello09x.fakeplayer.core.Main
+api-version: '1.20'
+authors: ["hello09x", "GreenBn"]
+website: 'https://github.com/Pstar233/minecraft-fakeplayer-folia'
+folia-supported: true
+depend:
+  - CommandAPI
+
+softdepend:
+  - OpenInv
+  - PlaceholderAPI
+
+permissions:
+  fakeplayer.command.spawn:
+    description: 'Allow player to run /fp spawn'
+  fakeplayer.command.spawn.name:
+    description: 'Allow player to run /fp spawn and specify a name'
+  fakeplayer.command.spawn.location:
+    description: 'Allow player to run /fp spawn and specify a spawn location'
+  fakeplayer.command.kill:
+    description: 'Allow player to run /fp kill'
+  fakeplayer.command.list:
+    description: 'Allow player to run /fp list'
+  fakeplayer.command.select:
+    description: 'Allow player to run /fp select'
+  fakeplayer.command.selection:
+    description: 'Allow player to run /fp selection'
+  fakeplayer.command.distance:
+    description: 'Allow player to run /fp distance'
+  fakeplayer.command.drop:
+    description: 'Allow player to run /fp drop'
+  fakeplayer.command.dropstack:
+    description: 'Allow player to run /fp dropstack'
+  fakeplayer.command.dropinv:
+    description: 'Allow player to run /fp dropinv'
+  fakeplayer.command.skin:
+    description: 'Allow player to run /fp skin'
+  fakeplayer.command.invsee:
+    description: 'Allow player to run /fp invsee'
+  fakeplayer.command.status:
+    description: 'Allow player to run /fp status'
+  fakeplayer.command.respawn:
+    description: 'Allow player to run /fp respawn'
+  fakeplayer.command.expme:
+    description: 'Allow player to run /fp expme'
+  fakeplayer.command.tp:
+    description: 'Allow player to run /fp tp'
+  fakeplayer.command.tphere:
+    description: 'Allow player to run /fp tphere'
+  fakeplayer.command.tps:
+    description: 'Allow player to run /fp tps'
+  fakeplayer.command.config:
+    description: 'Allow player to run /fp config'
+  fakeplayer.command.set:
+    description: 'Allow player to run /fp set'
+  fakeplayer.command.attack:
+    description: 'Allow player to run /fp attack'
+  fakeplayer.command.mine:
+    description: 'Allow player to run /fp mine'
+  fakeplayer.command.use:
+    description: 'Allow player to run /fp use'
+  fakeplayer.command.jump:
+    description: 'Allow player to run /fp jump'
+  fakeplayer.command.sneak:
+    description: 'Allow player to run /fp sneak'
+  fakeplayer.command.sprint:
+    description: 'Allow player to run /fp sprint'
+  fakeplayer.command.look:
+    description: 'Allow player to run /fp look'
+  fakeplayer.command.turn:
+    description: 'Allow player to run /fp turn'
+  fakeplayer.command.move:
+    description: 'Allow player to run /fp move'
+  fakeplayer.command.ride:
+    description: 'Allow player to run /fp ride'
+  fakeplayer.command.swap:
+    description: 'Allow player to run /fp swap'
+  fakeplayer.command.sleep:
+    description: 'Allow player to run /fp sleep'
+  fakeplayer.command.stop:
+    description: 'Allow player to run /fp stop'
+  fakeplayer.command.wakeup:
+    description: 'Allow player to run /fp wakeup'
+  fakeplayer.command.hold:
+    description: 'Allow player to run /fp hold'
+  fakeplayer.command.cmd:
+    description: 'Allow player to run /fp cmd'
+  fakeplayer.config.replenish:
+    description: 'Allow player to configure fake players can replenish'
+  fakeplayer.config.replenish.chest:
+    description: 'Allow player to configure fake players can replenish from nearby chest'
+  fakeplayer.config.autofish:
+    description: 'Allow player to configure fake players to auto-fishing'
+
+  fakeplayer.spawn:
+    description: 'Includes all basic permissions'
+    children:
+      - fakeplayer.command.spawn
+      - fakeplayer.command.kill
+      - fakeplayer.command.list
+      - fakeplayer.command.distance
+      - fakeplayer.command.select
+      - fakeplayer.command.selection
+      - fakeplayer.command.drop
+      - fakeplayer.command.dropstack
+      - fakeplayer.command.dropinv
+      - fakeplayer.command.skin
+      - fakeplayer.command.invsee
+      - fakeplayer.command.status
+      - fakeplayer.command.respawn
+      - fakeplayer.command.config
+      - fakeplayer.command.set
+
+  fakeplayer.tp:
+    description: 'Includes all permissions about teleport'
+    children:
+      - fakeplayer.command.tp
+      - fakeplayer.command.tphere
+      - fakeplayer.command.tps
+
+  fakeplayer.exp:
+    description: '所有关于经验值的命令权限'
+    children:
+      - fakeplayer.command.expme
+
+  fakeplayer.action:
+    description: 'Includes all permissions about controlling action'
+    children:
+      - fakeplayer.command.attack
+      - fakeplayer.command.mine
+      - fakeplayer.command.use
+      - fakeplayer.command.jump
+      - fakeplayer.command.sneak
+      - fakeplayer.command.sprint
+      - fakeplayer.command.look
+      - fakeplayer.command.turn
+      - fakeplayer.command.move
+      - fakeplayer.command.ride
+      - fakeplayer.command.swap
+      - fakeplayer.command.sleep
+      - fakeplayer.command.wakeup
+      - fakeplayer.command.hold
+      - fakeplayer.command.stop
+      - fakeplayer.config.replenish
+      - fakeplayer.config.replenish.chest
+      - fakeplayer.config.autofish
+
+  fakeplayer.*:
+    description: 'Includes all permissions'
+    children:
+      - fakeplayer.spawn
+      - fakeplayer.tp
+      - fakeplayer.exp
+      - fakeplayer.action
+      - fakeplayer.cmd
