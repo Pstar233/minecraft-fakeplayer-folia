@@ -21,7 +21,7 @@ dependencies {
     compileOnly("com.github.Jikoo:OpenInv:5.1.13")
     compileOnly("me.clip:placeholderapi:2.11.6")
 
-    implementation("com.github.tanyaofei.devtools:devtools-core:0.1.6-SNAPSHOT")
-    implementation("com.github.tanyaofei.devtools:devtools-command:0.1.6-SNAPSHOT")
-    implementation("com.github.tanyaofei.devtools:devtools-database:0.1.6-SNAPSHOT")
+    implementation("com.github.tanyaofei.devtools:devtools-core:0.1.7-SNAPSHOT")
+    implementation("com.github.tanyaofei.devtools:devtools-command:0.1.7-SNAPSHOT")
+    implementation("com.github.tanyaofei.devtools:devtools-database:0.1.7-SNAPSHOT")
 }

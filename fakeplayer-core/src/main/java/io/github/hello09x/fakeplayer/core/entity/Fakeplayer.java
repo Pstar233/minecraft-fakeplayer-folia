@@ -80,7 +80,7 @@ public class Fakeplayer {
     private final SequenceName sequenceName;
 
     @NotNull
-    private final FakeplayerTicker2 ticker;
+    private final FakeplayerTicker ticker;
 
     @Getter
     @NotNull
@@ -114,7 +114,7 @@ public class Fakeplayer {
         this.handle = bridge.fromServer(Bukkit.getServer()).newPlayer(uuid, name);
         this.player = handle.getPlayer();
 
-        this.ticker = new FakeplayerTicker2(this, lifespan);
+        this.ticker = new FakeplayerTicker(this, lifespan);
         this.player.setPersistent(config.isPersistData());
         this.player.setSleepingIgnored(true);
         this.handle.setPlayBefore(); // 可避免一些插件的第一次入服欢迎信息

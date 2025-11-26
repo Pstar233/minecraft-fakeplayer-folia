@@ -119,9 +119,10 @@ public class NameManager {
      * @return 序列名
      */
     public @NotNull SequenceName getSpecifiedName(@NotNull String name) {
-        if (StringUtils.isNotBlank(config.getNamePrefix())) {
-            name = config.getNamePrefix().trim() + name;
-        }
+        // 这里我注解了，因为自定义了名称，我就不用前缀了
+        //if (StringUtils.isNotBlank(config.getNamePrefix())) {
+        //    name = config.getNamePrefix().trim() + name;
+        //}
         // 这 "-"
         if (name.startsWith("_")) {
             throw new IllegalCustomNameException(translatable(
@@ -179,7 +180,6 @@ public class NameManager {
 
     /**
      * 获取一个序列名
-     *
      * @param creator 创建者
      * @return 序列名
      */
