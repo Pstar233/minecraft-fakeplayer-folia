@@ -5,8 +5,7 @@ plugins {
 
 allprojects {
     group = "io.github.hello09x.fakeplayer"
-    version = "4.0"
-
+    version = "4.1"
     repositories {
         mavenCentral()
         maven("https://repo.papermc.io/repository/maven-public/")

@@ -272,9 +272,7 @@ public class Fakeplayer {
     }
 
     private void setupName() {
-        System.out.println("player.getName()||" + player.getName());
         var displayName = text(player.getName(), player.getName().matches(".*_\\d+$") ? config.getNameStyleColor() : config.getCustomizationNameStyleColor(), player.getName().matches(".*_\\d+$") ? config.getNameStyleDecorations().toArray(new TextDecoration[0]) : config.getCustomizationNameStyleDecorations().toArray(new TextDecoration[0]));
-        System.out.println("displayName||" + displayName);
         player.playerListName(displayName);
         player.displayName(displayName);
         player.customName(displayName);

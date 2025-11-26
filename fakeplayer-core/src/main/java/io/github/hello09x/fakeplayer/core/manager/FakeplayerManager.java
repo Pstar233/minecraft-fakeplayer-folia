@@ -411,11 +411,13 @@ public class FakeplayerManager {
         var u = target.getUniqueId().toString();
         var c = Objects.requireNonNull(this.getCreatorName(target));
         for (var cmd : Commands.formatCommands(commands, "%p", p, "%u", u, "%c", c)) {
-            if (!target.performCommand(cmd)) {
-                log.warning(target.getName() + " failed to execute command: " + cmd);
-            } else {
-                log.info(target.getName() + " issued command: " + cmd);
-            }
+            target.getScheduler().run(Main.getInstance(), task -> {
+                if (!target.performCommand(cmd)) {
+                    log.warning(target.getName() + " failed to execute command: " + cmd);
+                } else {
+                    log.info(target.getName() + " issued command: " + cmd);
+                }
+            }, null);
         }
     }
 
@@ -424,17 +426,19 @@ public class FakeplayerManager {
             return;
         }
 
-        var server = Bukkit.getServer();
-        var sender = Bukkit.getConsoleSender();
         var p = fp.getName();
         var u = fp.getUUID().toString();
         var c = fp.getCreator().getName();
         for (var cmd : Commands.formatCommands(commands, "%p", p, "%u", u, "%c", c)) {
-            if (!server.dispatchCommand(sender, cmd)) {
-                log.warning("Failed to execute command for %s: ".formatted(p) + cmd);
-            } else {
-                log.info("Dispatched command: " + cmd);
-            }
+            Bukkit.getGlobalRegionScheduler().run(Main.getInstance(), task -> {
+                var server = Bukkit.getServer();
+                var sender = Bukkit.getConsoleSender();
+                if (!server.dispatchCommand(sender, cmd)) {
+                    log.warning("Failed to execute command for %s: ".formatted(p) + cmd);
+                } else {
+                    log.info("Dispatched command: " + cmd);
+                }
+            });
         }
     }
 
@@ -449,18 +453,21 @@ public class FakeplayerManager {
             return;
         }
 
-        var server = Bukkit.getServer();
-        var sender = Bukkit.getConsoleSender();
+
 
         var p = player.getName();
         var u = player.getUniqueId().toString();
         var c = Objects.requireNonNull(this.getCreatorName(player));
         for (var cmd : Commands.formatCommands(commands, "%p", p, "%u", u, "%c", c)) {
-            if (!server.dispatchCommand(sender, cmd)) {
-                log.warning("Failed to execute command for %s: ".formatted(p) + cmd);
-            } else {
-                log.info("Dispatched command: " + cmd);
-            }
+            Bukkit.getGlobalRegionScheduler().run(Main.getInstance(), task -> {
+                var server = Bukkit.getServer();
+                var sender = Bukkit.getConsoleSender();
+                if (!server.dispatchCommand(sender, cmd)) {
+                    log.warning("Failed to execute command for %s: ".formatted(p) + cmd);
+                } else {
+                    log.info("Dispatched command: " + cmd);
+                }
+            });
         }
     }
 

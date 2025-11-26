@@ -46,12 +46,12 @@ public class FakeServerGamePacketListenerImpl extends ServerGamePacketListenerIm
 
     @Override
     public void send(Packet<?> packet) {
-        System.out.println("收到包||" + packet.toString());
+        //System.out.println("收到包||" + packet.toString());
         if (packet instanceof ClientboundCustomPayloadPacket p) {
-            System.out.println("||1||" + p);
+            //System.out.println("||1||" + p);
             this.handleCustomPayloadPacket(p);
         } else if (packet instanceof ClientboundSetEntityMotionPacket p) {
-            System.out.println("||2||" + p);
+            //System.out.println("||2||" + p);
             this.handleClientboundSetEntityMotionPacket(p);
         }
     }
