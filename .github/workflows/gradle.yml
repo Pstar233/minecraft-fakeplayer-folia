@@ -26,8 +26,10 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      # Build jar with Gradle
-      - name: Build with Gradle
+      - name: Give gradlew permission
+        run: chmod +x gradlew
+
+      - name: Build
         run: ./gradlew build
 
       # Generate unique tag: build-yyyyMMdd-HHmmss
