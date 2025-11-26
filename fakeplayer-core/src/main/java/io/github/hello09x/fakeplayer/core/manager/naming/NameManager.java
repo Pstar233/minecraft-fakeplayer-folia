@@ -114,15 +114,13 @@ public class NameManager {
 
     /**
      * 通过自定义名称获取序列名
-     * 玩家名称中间的-
      * @param name 自定义名称
      * @return 序列名
      */
     public @NotNull SequenceName getSpecifiedName(@NotNull String name) {
-        // 这里我注解了，因为自定义了名称，我就不用前缀了
-        //if (StringUtils.isNotBlank(config.getNamePrefix())) {
-        //    name = config.getNamePrefix().trim() + name;
-        //}
+        if (StringUtils.isNotBlank(config.getCustomizationNamePrefix())) {
+            name = config.getCustomizationNamePrefix().trim() + name;
+        }
         // 这 "-"
         if (name.startsWith("_")) {
             throw new IllegalCustomNameException(translatable(

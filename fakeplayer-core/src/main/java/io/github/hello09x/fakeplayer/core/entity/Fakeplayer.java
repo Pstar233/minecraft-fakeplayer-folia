@@ -1,7 +1,6 @@
 package io.github.hello09x.fakeplayer.core.entity;
 
 import io.github.hello09x.devtools.command.exception.CommandException;
-import io.github.hello09x.devtools.core.utils.SchedulerUtils;
 import io.github.hello09x.devtools.core.utils.WorldUtils;
 import io.github.hello09x.fakeplayer.api.spi.*;
 import io.github.hello09x.fakeplayer.core.Main;
@@ -15,34 +14,23 @@ import io.github.hello09x.fakeplayer.core.manager.action.ActionManager;
 import io.github.hello09x.fakeplayer.core.manager.naming.SequenceName;
 import io.github.hello09x.fakeplayer.core.util.Attributes;
 import io.github.hello09x.fakeplayer.core.util.InternalAddressGenerator;
-import io.papermc.paper.util.Tick;
 import lombok.Getter;
 import net.kyori.adventure.text.format.TextDecoration;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.level.TicketType;
-import net.minecraft.world.level.ChunkPos;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.Sound;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.command.CommandSender;
-import org.bukkit.craftbukkit.entity.CraftPlayer;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
-import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnknownNullability;
 
-import java.awt.*;
 import java.net.InetAddress;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
@@ -284,7 +272,9 @@ public class Fakeplayer {
     }
 
     private void setupName() {
-        var displayName = text(player.getName(), config.getNameStyleColor(), config.getNameStyleDecorations().toArray(new TextDecoration[0]));
+        System.out.println("player.getName()||" + player.getName());
+        var displayName = text(player.getName(), player.getName().matches(".*_\\d+$") ? config.getNameStyleColor() : config.getCustomizationNameStyleColor(), player.getName().matches(".*_\\d+$") ? config.getNameStyleDecorations().toArray(new TextDecoration[0]) : config.getCustomizationNameStyleDecorations().toArray(new TextDecoration[0]));
+        System.out.println("displayName||" + displayName);
         player.playerListName(displayName);
         player.displayName(displayName);
         player.customName(displayName);

@@ -46,7 +46,9 @@ jobs:
           tag: ${{ steps.tagger.outputs.tag }}
           name: "由 GitHub 自动构建发布 ${{ steps.tagger.outputs.tag }}"
           body: |
-            Auto-generated release for commit ${{ github.sha }}.
+           ${{ github.event.head_commit.message }}
+            
+           Auto-generated release for commit ${{ github.sha }}.
           token: ${{ secrets.GITHUB_TOKEN }}
           artifacts: "build/libs/fakeplayer-*.jar"
           artifactErrorsFailBuild: true
