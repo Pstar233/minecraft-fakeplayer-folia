@@ -85,6 +85,11 @@ public class NMSServerPlayerImpl implements NMSServerPlayer {
     }
 
     @Override
+    public void setViewDistances() {
+
+    }
+
+    @Override
     public void absMoveTo(double x, double y, double z, float yRot, float xRot) {
         handle.absSnapTo(x, y, z, yRot, xRot);
     }

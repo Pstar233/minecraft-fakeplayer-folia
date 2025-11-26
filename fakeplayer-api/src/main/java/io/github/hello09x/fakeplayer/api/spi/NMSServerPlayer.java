@@ -56,6 +56,11 @@ public interface NMSServerPlayer {
     void doTick();
 
     /**
+     * 设置视距
+     */
+    void setViewDistances();
+
+    /**
      * 移动玩家
      *
      * @param x    X 坐标

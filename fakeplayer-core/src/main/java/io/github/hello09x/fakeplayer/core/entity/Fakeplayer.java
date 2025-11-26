@@ -80,7 +80,7 @@ public class Fakeplayer {
     private final SequenceName sequenceName;
 
     @NotNull
-    private final FakeplayerTicker ticker;
+    private final FakeplayerTicker2 ticker;
 
     @Getter
     @NotNull
@@ -114,10 +114,11 @@ public class Fakeplayer {
         this.handle = bridge.fromServer(Bukkit.getServer()).newPlayer(uuid, name);
         this.player = handle.getPlayer();
 
-        this.ticker = new FakeplayerTicker(this, lifespan);
+        this.ticker = new FakeplayerTicker2(this, lifespan);
         this.player.setPersistent(config.isPersistData());
         this.player.setSleepingIgnored(true);
         this.handle.setPlayBefore(); // 可避免一些插件的第一次入服欢迎信息
+        this.handle.setViewDistances();// 设置区块加载
         this.handle.disableAdvancements(Main.getInstance()); // 不提示成就信息
     }
 
@@ -186,8 +187,7 @@ public class Fakeplayer {
             this.handle.setupClientOptions();   // 处理皮肤设置问题
 
             this.teleportToSpawnpoint(option.spawnAt().clone());
-            var handle1 = ((CraftPlayer) player).getHandle();
-            this.ticker.start(handle1);
+            this.ticker.run();
 
             completableFuture.complete(null);
         });
@@ -201,11 +201,9 @@ public class Fakeplayer {
      */
     public void teleportToSpawnpoint(@NotNull Location to) {
         var from = this.player.getLocation();
-        System.out.println("触发：teleportToSpawnpoint");
         if (from.getWorld().equals(to.getWorld())) {
             // 如果生成世界等于目的世界, 则需要穿越一次维度才能获取刷怪能力
             var otherWorld = WorldUtils.getOtherWorld(from.getWorld());
-            System.out.println("otherWorld: "+otherWorld);
             if (otherWorld == null) {
                 this.creator.sendMessage(translatable(
                         "fakeplayer.command.spawn.error.no-mob-spawning-ability",

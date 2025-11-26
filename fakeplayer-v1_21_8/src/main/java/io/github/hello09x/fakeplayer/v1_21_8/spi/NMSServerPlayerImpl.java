@@ -1,5 +1,6 @@
 package io.github.hello09x.fakeplayer.v1_21_8.spi;
 
+import ca.spottedleaf.moonrise.patches.chunk_system.player.RegionizedPlayerChunkLoader;
 import io.github.hello09x.fakeplayer.api.spi.NMSServerPlayer;
 import io.github.hello09x.fakeplayer.core.constant.ConstantPool;
 import io.github.hello09x.fakeplayer.core.util.Reflections;
@@ -82,6 +83,14 @@ public class NMSServerPlayerImpl implements NMSServerPlayer {
     @Override
     public void doTick() {
         handle.doTick();
+    }
+    
+    @Override
+    public void setViewDistances(){
+        handle.moonrise$setRealPlayer(true);
+        handle.moonrise$getViewDistanceHolder().setLoadViewDistance(10);
+        handle.moonrise$getViewDistanceHolder().setSendViewDistance(10);
+        handle.moonrise$getViewDistanceHolder().setTickViewDistance(10);
     }
 
     @Override
