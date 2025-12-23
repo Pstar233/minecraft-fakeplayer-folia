@@ -1,3 +1,4 @@
+paperweight.reobfArtifactConfiguration = io.papermc.paperweight.userdev.ReobfArtifactConfiguration.MOJANG_PRODUCTION
 plugins {
     id("java")
     id("io.papermc.paperweight.userdev") version "2.0.0-beta.18"
@@ -5,7 +6,7 @@ plugins {
 
 allprojects {
     group = "io.github.hello09x.fakeplayer"
-    version = "4.1"
+    version = "4.2"
     repositories {
         mavenCentral()
         maven("https://repo.papermc.io/repository/maven-public/")
@@ -26,6 +27,7 @@ dependencies {
 
     compileOnly(project(":fakeplayer-api"))
     compileOnly(project(":fakeplayer-core"))
+
 }
 
 subprojects {

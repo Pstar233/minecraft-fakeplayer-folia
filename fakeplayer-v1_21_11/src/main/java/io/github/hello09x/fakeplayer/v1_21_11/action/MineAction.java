@@ -1,0 +1,172 @@
+package io.github.hello09x.fakeplayer.v1_21_11.action;
+
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.concurrent.CompletableFuture;
+
+import static net.minecraft.network.protocol.game.ServerboundPlayerActionPacket.Action.*;
+
+public class MineAction extends TraceAction {
+
+    private final Current current = new Current();
+
+    public MineAction(ServerPlayer player) {
+        super(player);
+    }
+
+    @Override
+    @SuppressWarnings("resource")
+    public CompletableFuture<Boolean> CompletableFutureTick() {
+        CompletableFuture<Boolean> completableFuture = new CompletableFuture<>();
+        getTarget().thenAccept(hitResult -> {
+            var hit = hitResult;
+            if (hit == null) {
+                completableFuture.complete(false);
+            }
+
+            if (hit.getType() != HitResult.Type.BLOCK) {
+                completableFuture.complete(false);
+            }
+
+            if (current.freeze > 0) {
+                current.freeze--;
+                completableFuture.complete(false);
+            }
+
+            var blockHit = (BlockHitResult) hit;
+            var pos = blockHit.getBlockPos();
+            var side = blockHit.getDirection();
+
+            if (player.blockActionRestricted(player.level(), pos, player.gameMode.getGameModeForPlayer())) {
+                completableFuture.complete(false);
+            }
+
+            if (current.pos != null && player.level().getBlockState(current.pos).isAir()) {
+                current.pos = null;
+                completableFuture.complete(false);
+            }
+
+            var state = player.level().getBlockState(pos);
+            var broken = false;
+            if (player.gameMode.getGameModeForPlayer().isCreative()) {
+                player.gameMode.handleBlockBreakAction(
+                        pos,
+                        START_DESTROY_BLOCK,
+                        side,
+                        player.level().getMaxY(),
+                        -1
+                );
+                current.freeze = 5;
+                broken = true;
+            } else if (current.pos == null || !current.pos.equals(pos)) {
+                if (current.pos != null) {
+                    player.gameMode.handleBlockBreakAction(
+                            current.pos,
+                            ABORT_DESTROY_BLOCK,
+                            side,
+                            player.level().getMaxY(),
+                            -1
+                    );
+                }
+
+                player.gameMode.handleBlockBreakAction(
+                        pos,
+                        START_DESTROY_BLOCK,
+                        side,
+                        player.level().getMaxY(),
+                        -1
+                );
+
+                if (!state.isAir() && current.progress == 0) {
+                    state.attack(player.level(), pos, player);
+                }
+
+                if (!state.isAir() && state.getDestroyProgress(player, player.level(), pos) >= 1) {
+                    current.pos = null;
+                    broken = true;
+                } else {
+                    current.pos = pos;
+                    current.progress = 0;
+                }
+            } else {
+                current.progress += state.getDestroyProgress(player, player.level(), pos);
+                if (current.progress >= 1) {
+                    player.gameMode.handleBlockBreakAction(
+                            pos,
+                            STOP_DESTROY_BLOCK,
+                            side,
+                            player.level().getMaxY(),
+                            -1
+                    );
+                    current.pos = null;
+                    current.freeze = 5;
+                    broken = true;
+                }
+                player.level().destroyBlockProgress(-1, pos, (int) (current.progress * 10));
+            }
+
+            player.resetLastActionTime();
+            player.swing(InteractionHand.MAIN_HAND);
+            completableFuture.complete(broken);
+        });
+
+        return completableFuture;
+    }
+
+    @Override
+    public boolean tick() {
+        return false;
+    }
+
+    @Override
+    public void inactiveTick() {
+        stop();
+    }
+
+    @Override
+    @SuppressWarnings("resource")
+    public void stop() {
+        if (current.pos == null) {
+            return;
+        }
+
+        player.level().destroyBlockProgress(-1, current.pos, -1);
+        player.gameMode.handleBlockBreakAction(
+                current.pos,
+                ABORT_DESTROY_BLOCK,
+                Direction.DOWN,
+                player.level().getMaxY(),
+                -1
+        );
+        current.pos = null;
+        current.freeze = 0;
+        current.progress = 0;
+    }
+
+    private static class Current {
+
+        /**
+         * 当前左键的目标位置
+         */
+        @Nullable
+        public BlockPos pos;
+
+        /**
+         * 破坏方块的进度
+         */
+        public float progress;
+
+        /**
+         * 冷却, 单位: tick
+         */
+        public int freeze;
+
+    }
+
+}

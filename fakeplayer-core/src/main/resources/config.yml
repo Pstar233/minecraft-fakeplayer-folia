@@ -41,7 +41,6 @@ player-limit: 1
 # Define whether to check if players with the same IP sharing `player-limit`
 detect-ip: true
 
-
 # 假人存活时间, 0 表示永久
 # 单位: 分钟
 # Define the maximum lifespan of fake players

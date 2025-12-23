@@ -23,6 +23,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
+import org.bukkit.event.player.PlayerPreLoginEvent;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnknownNullability;
@@ -234,11 +235,7 @@ public class Fakeplayer {
     }
 
     private @NotNull AsyncPlayerPreLoginEvent callPreLoginEvent(@NotNull InetAddress address) {
-        var event = new AsyncPlayerPreLoginEvent(
-                this.name,
-                address,
-                this.uuid
-        );
+        var event = new AsyncPlayerPreLoginEvent(this.name, address, this.uuid, false);
         Bukkit.getPluginManager().callEvent(event);
         return event;
     }

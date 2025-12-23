@@ -30,6 +30,7 @@ dependencies {
     implementation(project(":fakeplayer-v1_21_6"))
     implementation(project(":fakeplayer-v1_21_7"))
     implementation(project(":fakeplayer-v1_21_8"))
+    implementation(project(":fakeplayer-v1_21_11"))
 }
 
 // ShadowJar 配置（替代 Maven shade）
