@@ -4,14 +4,6 @@ import java.util.concurrent.CompletableFuture;
 
 public interface Action {
 
-    /**
-     * 活跃 tick 时执行
-     *
-     * @return 是否有做出行动
-     */
-    default CompletableFuture<Boolean> CompletableFutureTick() {
-        return null;
-    }
 
     boolean tick();
 

@@ -21,22 +21,19 @@ public class MineAction extends TraceAction {
     }
 
     @Override
-    @SuppressWarnings("resource")
-    public CompletableFuture<Boolean> CompletableFutureTick() {
-        CompletableFuture<Boolean> completableFuture = new CompletableFuture<>();
-        getTarget().thenAccept(hitResult -> {
-            var hit = hitResult;
+    public boolean tick() {
+        HitResult hit = getTarget();
             if (hit == null) {
-                completableFuture.complete(false);
+                return false;
             }
 
             if (hit.getType() != HitResult.Type.BLOCK) {
-                completableFuture.complete(false);
+                return false;
             }
 
             if (current.freeze > 0) {
                 current.freeze--;
-                completableFuture.complete(false);
+                return false;
             }
 
             var blockHit = (BlockHitResult) hit;
@@ -44,12 +41,12 @@ public class MineAction extends TraceAction {
             var side = blockHit.getDirection();
 
             if (player.blockActionRestricted(player.level(), pos, player.gameMode.getGameModeForPlayer())) {
-                completableFuture.complete(false);
+                return false;
             }
 
             if (current.pos != null && player.level().getBlockState(current.pos).isAir()) {
                 current.pos = null;
-                completableFuture.complete(false);
+                return false;
             }
 
             var state = player.level().getBlockState(pos);
@@ -113,15 +110,7 @@ public class MineAction extends TraceAction {
 
             player.resetLastActionTime();
             player.swing(InteractionHand.MAIN_HAND);
-            completableFuture.complete(broken);
-        });
-
-        return completableFuture;
-    }
-
-    @Override
-    public boolean tick() {
-        return false;
+            return broken;
     }
 
     @Override

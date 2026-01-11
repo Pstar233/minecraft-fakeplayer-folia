@@ -17,33 +17,26 @@ public class AttackAction extends TraceAction {
         this.player = player;
     }
 
-
-    @Override
-    public CompletableFuture<Boolean> CompletableFutureTick() {
-        CompletableFuture<Boolean> completableFuture = new CompletableFuture<>();
-        getTarget().thenAccept(hitResult -> {
-            var hit = hitResult;
-            if (hit == null) {
-                completableFuture.complete(false);
-            }
-
-            if (hit.getType() != HitResult.Type.ENTITY) {
-                completableFuture.complete(false);
-            }
-
-            var entityHit = (EntityHitResult) hit;
-            player.attack(entityHit.getEntity());
-            player.swing(InteractionHand.MAIN_HAND);
-            player.resetAttackStrengthTicker();
-            player.resetLastActionTime();
-            completableFuture.complete(true);
-        });
-        return completableFuture;
-    }
-
     @Override
     public boolean tick() {
-        return false;
+        HitResult hit = getTarget();
+
+
+        if (hit == null) {
+            return false;
+        }
+
+        if (hit.getType() != HitResult.Type.ENTITY) {
+            return false;
+        }
+
+        var entityHit = (EntityHitResult) hit;
+        player.attack(entityHit.getEntity());
+        player.swing(InteractionHand.MAIN_HAND);
+        player.resetAttackStrengthTicker();
+        player.resetLastActionTime();
+
+        return true;
     }
 
     @Override

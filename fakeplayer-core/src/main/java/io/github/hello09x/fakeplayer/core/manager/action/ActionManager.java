@@ -81,14 +81,12 @@ public class ActionManager {
     }
 
     public void tick() {
-
         var snapshot = new ArrayList<>(managers.entrySet());
 
         for (var entry : snapshot) {
             var player = Bukkit.getPlayer(entry.getKey());
             if (player == null || !player.isOnline()) continue;
-
-            player.getScheduler().run(Main.getInstance(), task -> {
+          player.getScheduler().run(Main.getInstance(), task -> {
                 if (!player.isValid()) {
                     managers.remove(entry.getKey());
                     entry.getValue().values().forEach(ActionTicker::stop);
