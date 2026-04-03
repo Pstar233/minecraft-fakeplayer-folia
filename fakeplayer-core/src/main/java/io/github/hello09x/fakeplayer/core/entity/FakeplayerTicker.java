@@ -3,6 +3,7 @@ package io.github.hello09x.fakeplayer.core.entity;
 import io.github.hello09x.fakeplayer.api.spi.NMSServerPlayer;
 import io.github.hello09x.fakeplayer.core.Main;
 import io.github.hello09x.fakeplayer.core.manager.FakeplayerManager;
+import io.github.hello09x.fakeplayer.core.manager.action.ActionManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -12,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.concurrent.TimeUnit;
 
 public class FakeplayerTicker {
+    private final static ActionManager actionManager = Main.getInjector().getInstance(ActionManager.class);
 
     public final static long NON_REMOVE_AT = -1;
 
@@ -60,8 +62,13 @@ public class FakeplayerTicker {
                 this.doFirstTick();
             } else {
                 this.doTick();
+
+                //其他Tick
+
+                actionManager.tick(player.getPlayer());
+
             }
-        }, null, 1L, 2L);
+        }, null, 1L, 1L);
 
     }
 

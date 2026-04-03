@@ -8,13 +8,13 @@ import io.github.hello09x.fakeplayer.api.spi.ActionTicker;
 import io.github.hello09x.fakeplayer.api.spi.ActionType;
 import io.github.hello09x.fakeplayer.api.spi.NMSBridge;
 import io.github.hello09x.fakeplayer.core.Main;
+import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -32,7 +32,6 @@ public class ActionManager {
     @Inject
     public ActionManager(NMSBridge bridge) {
         this.bridge = bridge;
-        Bukkit.getAsyncScheduler().runAtFixedRate(Main.getInstance(), task -> tick(), 50, 50, TimeUnit.MILLISECONDS);
     }
 
     public boolean hasActiveAction(
@@ -80,33 +79,31 @@ public class ActionManager {
         }
     }
 
-    public void tick() {
-        var snapshot = new ArrayList<>(managers.entrySet());
+    public void tick(Player player) {
 
-        for (var entry : snapshot) {
-            var player = Bukkit.getPlayer(entry.getKey());
-            if (player == null || !player.isOnline()) continue;
-          player.getScheduler().run(Main.getInstance(), task -> {
-                if (!player.isValid()) {
-                    managers.remove(entry.getKey());
-                    entry.getValue().values().forEach(ActionTicker::stop);
-                    return;
-                }
+        Map<ActionType, ActionTicker> actionTypeActionTickerMap = managers.get(player.getUniqueId());
+        if (player == null || !player.isOnline()) return;
 
-                entry.getValue().values().removeIf(ticker -> {
-                    try {
-                        return ticker.tick();
-                    } catch (Throwable e) {
-                        log.warning(Throwables.getStackTraceAsString(e));
-                        return false;
-                    }
-                });
-
-                if (entry.getValue().isEmpty()) {
-                    managers.remove(entry.getKey());
-                }
-            }, null);
+        if (!player.isValid()) {
+            managers.remove(player.getUniqueId());
+            actionTypeActionTickerMap.values().forEach(ActionTicker::stop);
+            return;
         }
+
+        if (actionTypeActionTickerMap == null || actionTypeActionTickerMap.isEmpty()) return;
+        actionTypeActionTickerMap.values().removeIf(ticker -> {
+            try {
+                return ticker.tick();
+            } catch (Throwable e) {
+                log.warning(Throwables.getStackTraceAsString(e));
+                return false;
+            }
+        });
+
+        if (actionTypeActionTickerMap.isEmpty()) {
+            managers.remove(player.getUniqueId());
+        }
+
     }
 
 }
